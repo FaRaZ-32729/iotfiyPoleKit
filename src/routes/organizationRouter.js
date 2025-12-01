@@ -4,7 +4,7 @@ const adminOnly = require("../middlewere/adminOnly");
 
 const router = express.Router();
 
-router.post("/new-org", adminOnly, createOrganization);
+router.post("/add", adminOnly, createOrganization);
 router.get("/all-org", adminOnly, getOrganizations);
 router.get("/:userId", getOrganizationByUserId);
 router.put("/update/:id", adminOnly, updateOrganization);

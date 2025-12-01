@@ -4,6 +4,9 @@ const jwt = require("jsonwebtoken");
 const sendEmail = require("../utils/sendEmail");
 const organizationModel = require("../models/organizationModel");
 const venueModel = require("../models/venueModal");
+const dotenv = require("dotenv");
+
+dotenv.config();
 
 // api for registering admin
 const registerAdmin = async (req, res) => {
@@ -131,8 +134,7 @@ const createUser = async (req, res) => {
         });
 
         /* ---------------- SEND SETUP EMAIL ---------------- */
-        // const setupLink = `http://localhost:5173/setup-password/${token}`;
-        const setupLink = `https://luckyone-iotfiysolutions.vercel.app/setup-password/${token}`;
+        const setupLink = `${process.env.FRONTEND_URL}/setup-password/${token}`;
 
         await sendEmail(
             newUser.email,
