@@ -15,6 +15,7 @@ const generateApiKey = (deviceId, conditions) => {
 };
 
 // create devices
+
 // const createDevice = async (req, res) => {
 //     try {
 //         const { deviceId, venueId, conditions } = req.body;
@@ -89,6 +90,7 @@ const generateApiKey = (deviceId, conditions) => {
 //         return res.status(500).json({ message: "Internal Server Error" });
 //     }
 // };
+
 const createDevice = async (req, res) => {
     try {
         const { orgId, venueId, deviceId, latitude, longitude } = req.body;
@@ -99,6 +101,10 @@ const createDevice = async (req, res) => {
                 message: "orgId, venueId, deviceId, latitude, and longitude are required",
             });
         }
+
+        // Check duplicate deviceId
+        const duplicateDevice = await deviceModel.findOne({ deviceId });
+        if (duplicateDevice) return res.status(400).json({ message: "Device ID already exists. So should be unique" })
 
         // Check venue existence
         const venue = await venueModel.findById(venueId);
@@ -118,12 +124,12 @@ const createDevice = async (req, res) => {
         }
 
         // Check duplicate deviceId in same venue
-        const existingDevice = await deviceModel.findOne({ deviceId, venue: venueId });
-        if (existingDevice) {
-            return res.status(400).json({
-                message: `Device ID "${deviceId}" already exists in this venue`,
-            });
-        }
+        // const existingDevice = await deviceModel.findOne({ deviceId, venue: venueId });
+        // if (existingDevice) {
+        //     return res.status(400).json({
+        //         message: `Device ID "${deviceId}" already exists in this venue`,
+        //     });
+        // }
 
         // Validate latitude & longitude (must be valid numbers)
         if (isNaN(latitude) || isNaN(longitude)) {
@@ -218,27 +224,145 @@ const getDevicesByVenue = async (req, res) => {
 
 // update devices 
 // NOTE :  if user updates deviceId and Conditons than new apiKey will generate otherwise apiKey remains same
+
+// const updateDevice = async (req, res) => {
+//     try {
+//         const { id } = req.params;
+//         const { deviceId, venueId, conditions } = req.body;
+
+//         // Find device first
+//         const device = await deviceModel.findById(id);
+//         if (!device) {
+//             return res.status(404).json({ message: "Device not found" });
+//         }
+
+
+//         const oldDeviceId = device.deviceId;
+//         // const oldConditions = JSON.stringify(device.conditions);
+//         const oldConditions = device.conditions.map(c => ({
+//             type: c.type,
+//             operator: c.operator,
+//             value: c.value
+//         }));
+
+//         // Validate venue if supplied
+//         if (venueId) {
+//             const venue = await venueModel.findById(venueId);
+//             if (!venue) {
+//                 return res.status(404).json({ message: "Venue not found" });
+//             }
+//         }
+
+//         // If deviceId is updated, check duplicate
+//         if (deviceId && deviceId !== device.deviceId) {
+//             const exists = await deviceModel.findOne({ deviceId });
+//             if (exists) {
+//                 return res.status(400).json({
+//                     message: `Device ID "${deviceId}" already exists`,
+//                 });
+//             }
+//         }
+
+//         // Validate conditions if provided
+//         if (conditions) {
+//             if (!Array.isArray(conditions)) {
+//                 return res.status(400).json({ message: "Conditions must be an array" });
+//             }
+
+//             const validTypes = ["temperature", "humidity"];
+//             const validOps = [">", "<"];
+
+//             for (const cond of conditions) {
+//                 if (!cond.type || !cond.operator || cond.value === undefined) {
+//                     return res.status(400).json({
+//                         message: "Each condition must include type, operator, and value",
+//                     });
+//                 }
+
+//                 if (!validTypes.includes(cond.type)) {
+//                     return res.status(400).json({
+//                         message: `Invalid type "${cond.type}". Allowed: ${validTypes.join(", ")}`,
+//                     });
+//                 }
+
+//                 if (!validOps.includes(cond.operator)) {
+//                     return res.status(400).json({
+//                         message: `Invalid operator "${cond.operator}". Allowed: >, <`,
+//                     });
+//                 }
+
+//             }
+//         }
+
+//         if (deviceId) device.deviceId = deviceId;
+//         if (venueId) device.venue = venueId;
+//         if (conditions) device.conditions = conditions;
+
+//         // Regenerate API key ONLY IF deviceId OR conditions changed
+//         let newApiKeyGenerated = false
+
+//         const newConditions = conditions
+//             ? conditions.map(c => ({ type: c.type, operator: c.operator, value: c.value }))
+//             : oldConditions;
+
+//         if ((deviceId && deviceId !== oldDeviceId) || JSON.stringify(oldConditions) !== JSON.stringify(newConditions)) {
+//             device.apiKey = generateApiKey(deviceId || oldDeviceId, newConditions);
+//             newApiKeyGenerated = true;
+//         }
+
+//         await device.save();
+
+//         const populatedDevice = await deviceModel
+//             .findById(device._id)
+//             .populate("venue");
+
+//         const message = newApiKeyGenerated
+//             ? "New API key generated! Please reconfigure your device."
+//             : "Device updated successfully";
+
+//         return res.status(200).json({
+//             message,
+//             device: populatedDevice,
+//         });
+
+//     } catch (error) {
+//         console.error("Error updating device:", error);
+//         return res.status(500).json({ message: "Internal Server Error" });
+//     }
+// };
+
 const updateDevice = async (req, res) => {
     try {
         const { id } = req.params;
-        const { deviceId, venueId, conditions } = req.body;
+        const { orgId, venueId, deviceId, latitude, longitude } = req.body;
 
-        // Find device first
+
+        // Fetch existing device
         const device = await deviceModel.findById(id);
         if (!device) {
             return res.status(404).json({ message: "Device not found" });
         }
 
+        if (deviceId && deviceId !== device.deviceId) {
+            const duplicateDevice = await deviceModel.findOne({
+                deviceId,
+                _id: { $ne: id } // ignore the current device
+            });
 
-        const oldDeviceId = device.deviceId;
-        // const oldConditions = JSON.stringify(device.conditions);
-        const oldConditions = device.conditions.map(c => ({
-            type: c.type,
-            operator: c.operator,
-            value: c.value
-        }));
+            if (duplicateDevice) {
+                return res.status(400).json({ message: "Device ID already exists. So it should be unique" });
+            }
+        }
 
-        // Validate venue if supplied
+        // Validate orgId (if updated)
+        if (orgId) {
+            const organization = await organizationModel.findById(orgId);
+            if (!organization) {
+                return res.status(404).json({ message: "Organization not found" });
+            }
+        }
+
+        // Validate venueId (if updated)
         if (venueId) {
             const venue = await venueModel.findById(venueId);
             if (!venue) {
@@ -246,76 +370,61 @@ const updateDevice = async (req, res) => {
             }
         }
 
-        // If deviceId is updated, check duplicate
-        if (deviceId && deviceId !== device.deviceId) {
-            const exists = await deviceModel.findOne({ deviceId });
-            if (exists) {
+        // Validate deviceId (if updated)
+        // if (deviceId) {
+            if (typeof deviceId !== "string" || deviceId.trim().length === 0) {
+                return res.status(400).json({ message: "Device ID is invalid" });
+            }
+
+            // Check duplicate deviceId inside same venue
+        //     const existingDevice = await deviceModel.findOne({
+        //         deviceId,
+        //         venue: venueId || device.venue, // venue may be updated or same
+        //         _id: { $ne: id } // ignore current device
+        //     });
+
+        //     if (existingDevice) {
+        //         return res.status(400).json({
+        //             message: `Device ID "${deviceId}" already exists in this venue`,
+        //         });
+        //     }
+        // }
+
+        // Validate latitude/longitude if provided
+        if (latitude !== undefined) {
+            if (isNaN(latitude)) {
+                return res.status(400).json({ message: "Latitude must be a valid number" });
+            }
+            if (latitude < -90 || latitude > 90) {
                 return res.status(400).json({
-                    message: `Device ID "${deviceId}" already exists`,
+                    message: "Latitude must be between -90 and 90",
                 });
             }
         }
 
-        // Validate conditions if provided
-        if (conditions) {
-            if (!Array.isArray(conditions)) {
-                return res.status(400).json({ message: "Conditions must be an array" });
+        if (longitude !== undefined) {
+            if (isNaN(longitude)) {
+                return res.status(400).json({ message: "Longitude must be a valid number" });
             }
-
-            const validTypes = ["temperature", "humidity"];
-            const validOps = [">", "<"];
-
-            for (const cond of conditions) {
-                if (!cond.type || !cond.operator || cond.value === undefined) {
-                    return res.status(400).json({
-                        message: "Each condition must include type, operator, and value",
-                    });
-                }
-
-                if (!validTypes.includes(cond.type)) {
-                    return res.status(400).json({
-                        message: `Invalid type "${cond.type}". Allowed: ${validTypes.join(", ")}`,
-                    });
-                }
-
-                if (!validOps.includes(cond.operator)) {
-                    return res.status(400).json({
-                        message: `Invalid operator "${cond.operator}". Allowed: >, <`,
-                    });
-                }
-
+            if (longitude < -180 || longitude > 180) {
+                return res.status(400).json({
+                    message: "Longitude must be between -180 and 180",
+                });
             }
         }
 
-        if (deviceId) device.deviceId = deviceId;
+        // Update fields only if provided
+        if (orgId) device.orgId = orgId;
         if (venueId) device.venue = venueId;
-        if (conditions) device.conditions = conditions;
-
-        // Regenerate API key ONLY IF deviceId OR conditions changed
-        let newApiKeyGenerated = false
-
-        const newConditions = conditions
-            ? conditions.map(c => ({ type: c.type, operator: c.operator, value: c.value }))
-            : oldConditions;
-
-        if ((deviceId && deviceId !== oldDeviceId) || JSON.stringify(oldConditions) !== JSON.stringify(newConditions)) {
-            device.apiKey = generateApiKey(deviceId || oldDeviceId, newConditions);
-            newApiKeyGenerated = true;
-        }
+        if (deviceId) device.deviceId = deviceId;
+        if (latitude !== undefined) device.latitude = latitude;
+        if (longitude !== undefined) device.longitude = longitude;
 
         await device.save();
 
-        const populatedDevice = await deviceModel
-            .findById(device._id)
-            .populate("venue");
-
-        const message = newApiKeyGenerated
-            ? "New API key generated! Please reconfigure your device."
-            : "Device updated successfully";
-
         return res.status(200).json({
-            message,
-            device: populatedDevice,
+            message: "Device updated successfully",
+            device,
         });
 
     } catch (error) {
@@ -323,6 +432,7 @@ const updateDevice = async (req, res) => {
         return res.status(500).json({ message: "Internal Server Error" });
     }
 };
+
 
 // delete device by id
 const deleteDevice = async (req, res) => {
