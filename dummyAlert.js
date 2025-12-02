@@ -2,48 +2,32 @@ const WebSocket = require("ws");
 
 const SERVER_URL = "ws://localhost:5050/ws/alerts";
 
+// Dummy devices
 const DEVICES = [
     "device-001",
     "device-002",
     "device-003",
+    "device-004",
 ];
 
-// generates random values
-function getRandomValue(min, max) {
-    return (Math.random() * (max - min) + min).toFixed(2);
+// Function to randomly return "DETECTED" or "NORMAL"
+function randomVoltageStatus() {
+    return Math.random() > 0.8 ? "DETECTED" : "NORMAL";
 }
 
-// simulate one device connection
+// Simulate single device connection
 function simulateDevice(deviceId) {
     const ws = new WebSocket(SERVER_URL);
-
-    // sends heartbeat 
-    // const heartbeatInterval = setInterval(() => {
-    //     if (ws.readyState === WebSocket.OPEN) {
-    //         const heartbeat = {
-    //             type: "heartbeat",
-    //             deviceId: deviceId,
-    //             timestamp: new Date().toISOString()
-    //         };
-
-    //         ws.send(JSON.stringify(heartbeat));
-    //         console.log(`[${deviceId}] Heartbeat sent`);
-    //     }
-    // }, 5000);
 
     ws.on("open", () => {
         console.log(`[${deviceId}] Connected to WebSocket Server`);
 
+        // send data every 10 seconds
         const interval = setInterval(() => {
             if (ws.readyState === WebSocket.OPEN) {
                 const payload = {
                     deviceId,
-                    humidity: getRandomValue(30, 90),
-                    temperature: getRandomValue(10, 40),
-                    humidityAlert: Math.random() > 0.8 ? "HIGH" : "NORMAL",
-                    temperatureAlert: Math.random() > 0.85 ? "HIGH" : "NORMAL",
-                    odourAlert: Math.random() > 0.9 ? "DETECTED" : "NORMAL  ",
-                    timestamp: new Date().toISOString(),
+                    voltage: randomVoltageStatus(),
                 };
 
                 ws.send(JSON.stringify(payload));
@@ -54,7 +38,6 @@ function simulateDevice(deviceId) {
         ws.on("close", () => {
             console.log(`[${deviceId}] Disconnected from server`);
             clearInterval(interval);
-            clearInterval(heartbeatInterval);
         });
 
         ws.on("error", (err) => {
@@ -67,5 +50,5 @@ function simulateDevice(deviceId) {
     });
 }
 
-// simulation for all devices
+// Start simulation for all devices
 DEVICES.forEach((id) => simulateDevice(id));

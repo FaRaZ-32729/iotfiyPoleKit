@@ -43,7 +43,8 @@ const deviceSchema = new mongoose.Schema(
     venue: { type: mongoose.Schema.Types.ObjectId, ref: "Venue", required: true },
     deviceId: { type: String, required: true },
     latitude: { type: Number, required: true },
-    longitude: { type: Number, required: true }
+    longitude: { type: Number, required: true },
+    voltage: { type: Boolean, default: null }
   },
   { timestamps: true }
 );

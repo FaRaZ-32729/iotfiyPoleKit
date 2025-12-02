@@ -4,15 +4,15 @@ const venueModel = require("../models/venueModal");
 
 
 
-const generateApiKey = (deviceId, conditions) => {
-    let rawString = deviceId;
+// const generateApiKey = (deviceId, conditions) => {
+//     let rawString = deviceId;
 
-    conditions.forEach(cond => {
-        rawString += `|${cond.type}${cond.operator}${cond.value}`;
-    });
+//     conditions.forEach(cond => {
+//         rawString += `|${cond.type}${cond.operator}${cond.value}`;
+//     });
 
-    return Buffer.from(rawString).toString("base64");
-};
+//     return Buffer.from(rawString).toString("base64");
+// };
 
 // create devices
 
