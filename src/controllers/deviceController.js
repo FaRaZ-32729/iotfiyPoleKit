@@ -1,4 +1,5 @@
 const deviceModel = require("../models/deviceModel");
+const organizationModel = require("../models/organizationModel");
 const venueModel = require("../models/venueModal");
 
 
@@ -14,13 +15,89 @@ const generateApiKey = (deviceId, conditions) => {
 };
 
 // create devices
+// const createDevice = async (req, res) => {
+//     try {
+//         const { deviceId, venueId, conditions } = req.body;
+
+//         // Basic field validation
+//         if (!deviceId || !venueId || conditions.length === 0) {
+//             return res.status(400).json({ message: "deviceId , venueId and conditions are required" });
+//         }
+
+//         // Check venue existence
+//         const venue = await venueModel.findById(venueId);
+//         if (!venue) {
+//             return res.status(404).json({ message: "Venue not found" });
+//         }
+
+//         // Prevent duplicate device
+//         const existing = await deviceModel.findOne({ deviceId });
+//         if (existing) {
+//             return res.status(400).json({ message: "Device ID already exists" });
+//         }
+
+//         // Validate conditions array
+//         if (conditions) {
+//             if (!Array.isArray(conditions)) {
+//                 return res.status(400).json({ message: "Conditions must be an array" });
+//             }
+
+//             for (const cond of conditions) {
+//                 // Required keys
+//                 if (!cond.type || !cond.operator || cond.value === undefined) {
+//                     return res.status(400).json({
+//                         message: "Each condition must include type, operator, and value",
+//                     });
+//                 }
+
+//                 // Allowed type values
+//                 const validTypes = ["temperature", "humidity"];
+//                 if (!validTypes.includes(cond.type)) {
+//                     return res.status(400).json({
+//                         message: `Invalid type "${cond.type}". Allowed types: ${validTypes.join(", ")}`,
+//                     });
+//                 }
+
+//                 // Allowed operators
+//                 const validOps = [">", "<"];
+//                 if (!validOps.includes(cond.operator)) {
+//                     return res.status(400).json({
+//                         message: `Invalid operator "${cond.operator}". Allowed operators: >, <`,
+//                     });
+//                 }
+
+//             }
+//         }
+
+//         // Generate API Key
+//         const apiKey = generateApiKey(deviceId, conditions || []);
+
+//         // Save device
+//         const newDevice = await deviceModel.create({
+//             deviceId,
+//             venue: venueId,
+//             conditions: conditions,
+//             apiKey,
+//         });
+
+//         return res.status(201).json({
+//             message: "Device created successfully",
+//             device: newDevice,
+//         });
+//     } catch (error) {
+//         console.error("Error creating device:", error);
+//         return res.status(500).json({ message: "Internal Server Error" });
+//     }
+// };
 const createDevice = async (req, res) => {
     try {
-        const { deviceId, venueId, conditions } = req.body;
+        const { orgId, venueId, deviceId, latitude, longitude } = req.body;
 
-        // Basic field validation
-        if (!deviceId || !venueId || conditions.length === 0) {
-            return res.status(400).json({ message: "deviceId , venueId and conditions are required" });
+        // Validate required fields
+        if (!orgId || !venueId || !deviceId || latitude === undefined || longitude === undefined) {
+            return res.status(400).json({
+                message: "orgId, venueId, deviceId, latitude, and longitude are required",
+            });
         }
 
         // Check venue existence
@@ -29,65 +106,65 @@ const createDevice = async (req, res) => {
             return res.status(404).json({ message: "Venue not found" });
         }
 
-        // Prevent duplicate device
-        const existing = await deviceModel.findOne({ deviceId });
-        if (existing) {
-            return res.status(400).json({ message: "Device ID already exists" });
+        // Check organization existence
+        const organization = await organizationModel.findById(orgId);
+        if (!organization) {
+            return res.status(404).json({ message: "Organization not found" });
         }
 
-        // Validate conditions array
-        if (conditions) {
-            if (!Array.isArray(conditions)) {
-                return res.status(400).json({ message: "Conditions must be an array" });
-            }
-
-            for (const cond of conditions) {
-                // Required keys
-                if (!cond.type || !cond.operator || cond.value === undefined) {
-                    return res.status(400).json({
-                        message: "Each condition must include type, operator, and value",
-                    });
-                }
-
-                // Allowed type values
-                const validTypes = ["temperature", "humidity"];
-                if (!validTypes.includes(cond.type)) {
-                    return res.status(400).json({
-                        message: `Invalid type "${cond.type}". Allowed types: ${validTypes.join(", ")}`,
-                    });
-                }
-
-                // Allowed operators
-                const validOps = [">", "<"];
-                if (!validOps.includes(cond.operator)) {
-                    return res.status(400).json({
-                        message: `Invalid operator "${cond.operator}". Allowed operators: >, <`,
-                    });
-                }
-
-            }
+        // Validate deviceId (string and not empty)
+        if (typeof deviceId !== "string" || deviceId.trim().length === 0) {
+            return res.status(400).json({ message: "Device ID is invalid" });
         }
 
-        // Generate API Key
-        const apiKey = generateApiKey(deviceId, conditions || []);
+        // Check duplicate deviceId in same venue
+        const existingDevice = await deviceModel.findOne({ deviceId, venue: venueId });
+        if (existingDevice) {
+            return res.status(400).json({
+                message: `Device ID "${deviceId}" already exists in this venue`,
+            });
+        }
+
+        // Validate latitude & longitude (must be valid numbers)
+        if (isNaN(latitude) || isNaN(longitude)) {
+            return res.status(400).json({ message: "Latitude and longitude must be valid numbers" });
+        }
+
+        // Validate latitude range
+        if (latitude < -90 || latitude > 90) {
+            return res.status(400).json({
+                message: "Latitude must be between -90 and 90",
+            });
+        }
+
+        // Validate longitude range
+        if (longitude < -180 || longitude > 180) {
+            return res.status(400).json({
+                message: "Longitude must be between -180 and 180",
+            });
+        }
 
         // Save device
         const newDevice = await deviceModel.create({
-            deviceId,
+            orgId,
             venue: venueId,
-            conditions: conditions,
-            apiKey,
+            deviceId,
+            latitude,
+            longitude,
         });
 
         return res.status(201).json({
             message: "Device created successfully",
             device: newDevice,
         });
+
     } catch (error) {
         console.error("Error creating device:", error);
         return res.status(500).json({ message: "Internal Server Error" });
     }
 };
+
+
 
 // get all devices
 const getAllDevices = async (req, res) => {

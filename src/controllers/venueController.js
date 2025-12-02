@@ -11,6 +11,9 @@ const createVenue = async (req, res) => {
         if (!name || !organization)
             return res.status(400).json({ message: "Venue name and organization are required" });
 
+        const org = await organizationModel.findById(organization);
+        if(!org) return res.status(404).json({message : "Organization not found"})
+
         const existingVenue = await venueModel.findOne({ name, organization });
         if (existingVenue) {
             return res.status(400).json({

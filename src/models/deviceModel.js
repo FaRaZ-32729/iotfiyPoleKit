@@ -1,37 +1,49 @@
 const mongoose = require("mongoose");
 
-const conditionSchema = new mongoose.Schema({
-  type: {
-    type: String,
-    required: true,
-    enum: ["temperature", "humidity"],
-  },
-  operator: {
-    type: String,
-    required: true,
-    enum: [">", "<"],
-  },
-  value: {
-    type: Number,
-    required: true
-  }
-});
+// const conditionSchema = new mongoose.Schema({
+//   type: {
+//     type: String,
+//     required: true,
+//     enum: ["temperature", "humidity"],
+//   },
+//   operator: {
+//     type: String,
+//     required: true,
+//     enum: [">", "<"],
+//   },
+//   value: {
+//     type: Number,
+//     required: true
+//   }
+// });
+
+// const deviceSchema = new mongoose.Schema(
+//   {
+//     deviceId: { type: String, unique: true, required: true },
+//     venue: { type: mongoose.Schema.Types.ObjectId, ref: "Venue", required: true },
+//     conditions: [conditionSchema],
+
+//     apiKey: { type: String, unique: true, required: true },
+
+//     // alerts
+//     temperatureAlert: { type: Boolean, default: false },
+//     humidityAlert: { type: Boolean, default: false },
+//     odourAlert: { type: Boolean, default: false },
+//     espTemprature: { type: Number, default: null },
+//     espHumidity: {type : Number , default : null}
+
+//   },
+//   { timestamps: true }
+// );
+
 
 const deviceSchema = new mongoose.Schema(
   {
-    deviceId: { type: String, unique: true, required: true },
+    orgId: { type: mongoose.Schema.Types.ObjectId, ref: "Organization", required: true },
     venue: { type: mongoose.Schema.Types.ObjectId, ref: "Venue", required: true },
-    conditions: [conditionSchema],
-
-    apiKey: { type: String, unique: true, required: true },
-
-    // alerts
-    temperatureAlert: { type: Boolean, default: false },
-    humidityAlert: { type: Boolean, default: false },
-    odourAlert: { type: Boolean, default: false },
-    espTemprature: { type: Number, default: null },
-    espHumidity: {type : Number , default : null}
-
+    deviceId: { type: String, required: true },
+    latitude: { type: Number, required: true },
+    longitude: { type: Number, required: true }
   },
   { timestamps: true }
 );

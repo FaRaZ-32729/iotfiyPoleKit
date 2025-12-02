@@ -183,7 +183,6 @@ const createUser = async (req, res) => {
     }
 };
 
-
 // set password
 const setPassword = async (req, res) => {
     try {
