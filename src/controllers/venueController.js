@@ -12,7 +12,7 @@ const createVenue = async (req, res) => {
             return res.status(400).json({ message: "Venue name and organization are required" });
 
         const org = await organizationModel.findById(organization);
-        if(!org) return res.status(404).json({message : "Organization not found"})
+        if (!org) return res.status(404).json({ message: "Organization not found" })
 
         const existingVenue = await venueModel.findOne({ name, organization });
         if (existingVenue) {
@@ -168,13 +168,13 @@ const updateVenueAsAdmin = async (req, res) => {
         }
 
         // Validate venue ID
-        const venue = await venueModel.findById(id);
+        const venue = await venueModel.findById(id).populate("organization", "name");
         if (!venue) {
             return res.status(404).json({ message: "Venue not found" });
         }
 
 
-        let newOrganizationId = venue.organization; // default: existing org
+        let newOrganizationId = venue.organization?._id; // default: existing org
 
         // If admin wants to update organization
         if (organizationId) {
@@ -207,7 +207,13 @@ const updateVenueAsAdmin = async (req, res) => {
         venue.name = name;
         venue.organization = newOrganizationId;
 
-        const updatedVenue = await venue.save();
+        // const updatedVenue = await venue.save();
+        await venue.save();
+
+        const updatedVenue = await venueModel
+            .findById(id)
+            .populate("organization", "name");
+
 
         return res.json({
             message: "Venue updated successfully",

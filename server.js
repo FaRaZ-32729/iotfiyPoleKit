@@ -33,7 +33,7 @@ const server = http.createServer(app);
 //     credentials: true
 // }));
 const allowedOrigins = [
-    "https://luckyone-iotfiysolutions.vercel.app",
+    // "https://luckyone-iotfiysolutions.vercel.app",
     "http://localhost:5173"
 ];
 

@@ -35,8 +35,8 @@ const userModel = require("../models/userModel");
 const authenticate = async (req, res, next) => {
     try {
         // Debug help (remove in prod)
-        console.log("headers.cookie:", req.headers.cookie);
-        console.log("authorization header:", req.headers.authorization?.slice?.(0, 50));
+        // console.log("headers.cookie:", req.headers.cookie);
+        // console.log("authorization header:", req.headers.authorization?.slice?.(0, 50));
 
         // 1) Try cookie first
         let token = req.cookies?.token;
@@ -53,6 +53,7 @@ const authenticate = async (req, res, next) => {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const user = await userModel.findById(decoded._id);
         if (!user) return res.status(404).json({ message: "User not found" });
+        console.log(`authanticated user ${user.name}`)
 
         req.user = user;
         next();
