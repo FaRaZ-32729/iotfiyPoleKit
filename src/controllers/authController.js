@@ -184,6 +184,88 @@ const createUser = async (req, res) => {
 };
 
 // set password
+
+
+// const setPassword = async (req, res) => {
+//     try {
+//         const { token } = req.params;
+//         const { password } = req.body;
+
+//         if (!password)
+//             return res.status(400).json({ message: "Password is required" });
+
+//         const passwordRegex =
+//             /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+//         if (!passwordRegex.test(password)) {
+//             return res.status(400).json({
+//                 message:
+//                     "Password must be at least 8 characters long, include uppercase, lowercase, number, and special character.",
+//             });
+//         };
+
+//         const decoded = jwt.verify(token, process.env.JWT_SECRET);
+//         const user = await userModel.findOne({ email: decoded.email, setupToken: token });
+//         if (!user)
+//             return res.status(404).json({ message: "Invalid or expired link" });
+
+//         const hashedPassword = await bcrypt.hash(password, 10);
+//         const otp = generateOTP();
+//         const otpExpiry = Date.now() + 10 * 60 * 1000; // 10 min validity
+
+//         user.password = hashedPassword;
+//         user.otp = otp;
+//         user.otpExpiry = otpExpiry;
+//         await user.save();
+
+
+//         await sendEmail(
+//             user.email,
+//             "Verify Your FrostKontrol Account",
+//             `
+//   <div style="font-family: Arial, sans-serif; color: #333; padding: 20px; max-width: 600px; margin: auto; border: 1px solid #e6e6e6; border-radius: 8px; background-color: #ffffff;">
+//       <div style="text-align: center; padding-bottom: 20px; border-bottom: 1px solid #e6e6e6;">
+//           <img src="https://i.ibb.co/2Mdp9p0/frostKontrol.png" alt="FrostKontrol Logo" style="max-width: 180px;" />
+//       </div>
+
+//       <h2 style="color: #263238; margin-top: 30px;">Welcome to FrostKontrol!</h2>
+//       <p style="font-size: 14px; line-height: 1.6;">
+//           Hi <strong>${user.name || user.email}</strong>,
+//           <br><br>
+//           Your password has been successfully set. To complete your account setup, please use the one-time password (OTP) below to verify your email address.
+//       </p>
+
+//       <div style="background-color: #f4faff; border: 1px solid #cde7ff; padding: 15px; margin: 20px 0; text-align: center; font-size: 22px; letter-spacing: 3px; font-weight: bold;">
+//           ${otp}
+//       </div>
+
+//       <p style="font-size: 14px; line-height: 1.6;">
+//           This OTP is valid for the next <strong>10 minutes</strong>. If you didn’t request this, please ignore this email.
+//       </p>
+
+//       <p style="font-size: 14px; line-height: 1.6;">
+//           Best Regards, <br>
+//           <strong>FrostKontrol Team</strong>
+//       </p>
+
+//       <div style="text-align: center; font-size: 12px; color: #777; margin-top: 30px;">
+//           © ${new Date().getFullYear()} FrostKontrol, All rights reserved.
+//           <br>
+//           This is an automated message, please do not reply.
+//       </div>
+//   </div>
+//   `
+//         );
+
+
+//         res.json({ message: "Password set successfully, OTP sent to email" });
+//     } catch (err) {
+//         console.error(err);
+//         res.status(500).json({ message: "Error setting password" });
+//     }
+// };
+
+
 const setPassword = async (req, res) => {
     try {
         const { token } = req.params;
@@ -217,16 +299,18 @@ const setPassword = async (req, res) => {
         await user.save();
 
 
+        const setupLink = `https://luckyone-iotfiysolutions.vercel.app/verify-otp/${token}`;
+
         await sendEmail(
             user.email,
-            "Verify Your FrostKontrol Account",
+            "Verify Your Odour Management System account",
             `
   <div style="font-family: Arial, sans-serif; color: #333; padding: 20px; max-width: 600px; margin: auto; border: 1px solid #e6e6e6; border-radius: 8px; background-color: #ffffff;">
       <div style="text-align: center; padding-bottom: 20px; border-bottom: 1px solid #e6e6e6;">
-          <img src="https://i.ibb.co/2Mdp9p0/frostKontrol.png" alt="FrostKontrol Logo" style="max-width: 180px;" />
+          <img src="cid:logo.png" alt="IOTFIY Logo" style="max-width: 150px;" />
       </div>
 
-      <h2 style="color: #263238; margin-top: 30px;">Welcome to FrostKontrol!</h2>
+      <h2 style="color: #263238; margin-top: 30px;">Welcome to Odour Management System!</h2>
       <p style="font-size: 14px; line-height: 1.6;">
           Hi <strong>${user.name || user.email}</strong>,
           <br><br>
@@ -237,17 +321,24 @@ const setPassword = async (req, res) => {
           ${otp}
       </div>
 
+      <div style="text-align: center; margin: 25px 0;">
+            <a href="${setupLink}"
+                style="background-color: #0055a5; color: white; padding: 12px 24px; border-radius: 4px; text-decoration: none; font-size: 16px;">
+                Verify OTP
+            </a>
+      </div>
+
       <p style="font-size: 14px; line-height: 1.6;">
           This OTP is valid for the next <strong>10 minutes</strong>. If you didn’t request this, please ignore this email.
       </p>
 
       <p style="font-size: 14px; line-height: 1.6;">
           Best Regards, <br>
-          <strong>FrostKontrol Team</strong>
+          <strong>LuckyOne Team</strong>
       </p>
 
       <div style="text-align: center; font-size: 12px; color: #777; margin-top: 30px;">
-          © ${new Date().getFullYear()} FrostKontrol, All rights reserved.
+          © ${new Date().getFullYear()} IOTFIY Solutions, All rights reserved.
           <br>
           This is an automated message, please do not reply.
       </div>

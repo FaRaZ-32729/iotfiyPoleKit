@@ -13,7 +13,7 @@ router.get("/status/:userId", getUserStatus);
 router.get("/:creatorId", getUsersByCreatorId);
 router.get("/:orgId", authenticate, adminOrAdminCreatedUser, getUsersByOrganizationId)
 router.put("/update/:id", authenticate, adminOnly, updateUserProfile);
-router.delete("/delete/:id", authenticate, adminOnly, deleteUser);
+router.delete("/delete/:id", authenticate, adminOrAdminCreatedUser, deleteUser);
 router.delete("/:userId/delete/:venueId", adminOrAdminCreatedUser, removeVenueFromUser);
 
 

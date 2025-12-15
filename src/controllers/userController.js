@@ -30,13 +30,15 @@ const getUsersByCreatorId = async (req, res) => {
 
         // Find users created by this creator
         const users = await userModel
-            .find({ creatorId: creatorId })
+            .find({ creatorId })
             .populate("venues", "venueId")
             .populate("organization", "name")
             .populate("creatorId", "name email");
 
+        console.log(users);
+
         if (users.length === 0) {
-            return res.status(404).json({ message: "No users found for this creator" });
+            return res.status(200).json({ message: "No users found for this creator", users: [] });
         }
 
         res.status(200).json({
