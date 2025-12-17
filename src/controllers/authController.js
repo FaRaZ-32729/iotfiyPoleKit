@@ -299,7 +299,7 @@ const setPassword = async (req, res) => {
         await user.save();
 
 
-        const setupLink = `https://luckyone-iotfiysolutions.vercel.app/verify-otp/${token}`;
+        const setupLink = `${process.env.FRONTEND_URL}/verify-otp/${token}`;
 
         await sendEmail(
             user.email,
