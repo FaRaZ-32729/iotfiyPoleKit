@@ -176,7 +176,7 @@ const createDevice = async (req, res) => {
 const getAllDevices = async (req, res) => {
     try {
         const devices = await deviceModel.find()
-            .populate("venue", "name");
+            .populate("venue", "name organization");
 
         if (!devices) return res.status(404).json({ message: "No Devices" });
 
@@ -372,11 +372,11 @@ const updateDevice = async (req, res) => {
 
         // Validate deviceId (if updated)
         // if (deviceId) {
-            if (typeof deviceId !== "string" || deviceId.trim().length === 0) {
-                return res.status(400).json({ message: "Device ID is invalid" });
-            }
+        if (typeof deviceId !== "string" || deviceId.trim().length === 0) {
+            return res.status(400).json({ message: "Device ID is invalid" });
+        }
 
-            // Check duplicate deviceId inside same venue
+        // Check duplicate deviceId inside same venue
         //     const existingDevice = await deviceModel.findOne({
         //         deviceId,
         //         venue: venueId || device.venue, // venue may be updated or same
