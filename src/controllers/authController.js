@@ -402,7 +402,17 @@ const loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        const user = await userModel.findOne({ email });
+        // const user = await userModel.findOne({ email });
+        let userQuery = userModel.findOne({ email });
+
+        // Populate only if organization field exists
+        userQuery = userQuery.populate({
+            path: "organization",
+            select: "name",
+        });
+
+        const user = await userQuery;
+
         if (!user)
             return res.status(404).json({ message: "User not found" });
 
