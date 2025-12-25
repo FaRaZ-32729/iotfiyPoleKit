@@ -8,6 +8,8 @@ const DEVICES = [
     "device-002",
     "device-003",
     "device-004",
+    "device-005",
+    "device-006",
 ];
 
 // Function to randomly return "DETECTED" or "NORMAL"
