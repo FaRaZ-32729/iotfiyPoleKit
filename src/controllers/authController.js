@@ -138,13 +138,13 @@ const createUser = async (req, res) => {
 
         await sendEmail(
             newUser.email,
-            "Set up your FrostKontroll account",
+            "Set up your PoleKit account",
             `
             <div style="font-family: Arial, sans-serif; color: #333; background: #f5f8fa; padding: 20px; border-radius: 8px;">
                 <div style="text-align: center;">
-                    <img src="cid:companyLogo" alt="FrostKontroll Logo" style="width: 120px; margin-bottom: 20px;" />
+                    <img src="cid:logo" alt="IOTFIY Logo" style="width: 120px; margin-bottom: 20px;" />
                 </div>
-                <h2 style="color: #0055a5;">Welcome to FrostKontroll!</h2>
+                <h2 style="color: #0055a5;">Welcome to PoleKit!</h2>
                 <p>Hello <b>${newUser.name || newUser.email}</b>,</p>
                 <p>Your account has been created. Please click below to set your password:</p>
 
@@ -160,7 +160,7 @@ const createUser = async (req, res) => {
                 </p>
                 <hr/>
                 <p style="font-size: 12px; text-align: center; color: #888;">
-                    © ${new Date().getFullYear()} FrostKontroll. All rights reserved.
+                    © ${new Date().getFullYear()} IOTFIY Solutions. All rights reserved.
                 </p>
             </div>
             `
@@ -303,14 +303,14 @@ const setPassword = async (req, res) => {
 
         await sendEmail(
             user.email,
-            "Verify Your Odour Management System account",
+            "Verify Your PoleKit account",
             `
   <div style="font-family: Arial, sans-serif; color: #333; padding: 20px; max-width: 600px; margin: auto; border: 1px solid #e6e6e6; border-radius: 8px; background-color: #ffffff;">
       <div style="text-align: center; padding-bottom: 20px; border-bottom: 1px solid #e6e6e6;">
           <img src="cid:logo.png" alt="IOTFIY Logo" style="max-width: 150px;" />
       </div>
 
-      <h2 style="color: #263238; margin-top: 30px;">Welcome to Odour Management System!</h2>
+      <h2 style="color: #263238; margin-top: 30px;">Welcome to PoleKit!</h2>
       <p style="font-size: 14px; line-height: 1.6;">
           Hi <strong>${user.name || user.email}</strong>,
           <br><br>
@@ -477,7 +477,7 @@ const forgotPassword = async (req, res) => {
         // Send email
         await sendEmail(
             user.email,
-            "Reset Your FrostKontroll Password",
+            "Reset Your PoleKit Account Password",
             `
             <div style="font-family: Arial, sans-serif; color: #333; padding: 20px;">
                 <h2>Password Reset Request</h2>
@@ -494,7 +494,7 @@ const forgotPassword = async (req, res) => {
 
                 <p>If you didn’t request this, please ignore this email.</p>
                 <hr/>
-                <p style="font-size: 12px; color: #777;">© ${new Date().getFullYear()} FrostKontroll. All rights reserved.</p>
+                <p style="font-size: 12px; color: #777;">© ${new Date().getFullYear()} IOTFIY Solutions. All rights reserved.</p>
             </div>
             `
         );

@@ -11,7 +11,7 @@ router.get("/single-venue/:id", getSingleVenue);
 router.get("/:userId", getUserVenues);
 router.get("/venue-by-org/:organizationId", adminOrAdminCreatedUser, getVenuesByOrganization);
 router.put("/update/:id", adminOrAdminCreatedUser, updateVenue);
-router.put("/admin/update/:id", adminOnly, updateVenueAsAdmin);
+router.put("/admin/update/:id", adminOrAdminCreatedUser, updateVenueAsAdmin);
 router.delete("/delete/:id", adminOrAdminCreatedUser, deleteVenue);
 
 module.exports = router;

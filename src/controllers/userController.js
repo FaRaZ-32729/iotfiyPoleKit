@@ -80,29 +80,29 @@ const updateUserStatus = async (req, res) => {
                 ? `
                     <p>Hello <b>${user.name || user.email}</b>,</p>
                     <p>We’re pleased to inform you that your account has been <b>re-activated</b> and is now accessible again.</p>
-                    <p>If you did not request this or believe it is a mistake, please <a href="mailto:support@frostkontroll.com">contact support</a>.</p>
+                    <p>If you did not request this or believe it is a mistake, please <a href="mailto:support@iotfiysolution.com">contact support</a>.</p>
                 `
                 : `
                     <p>Hello <b>${user.name || user.email}</b>,</p>
                     <p>Your account has been <b>deactivated</b> by the admin.</p>
                     <p><b>Reason:</b> ${suspensionReason}</p>
-                    <p>If you believe this action was taken in error, please <a href="mailto:support@frostkontroll.com">contact support</a> as soon as possible.</p>
+                    <p>If you believe this action was taken in error, please <a href="mailto:support@iotfiysolution.com">contact support</a> as soon as possible.</p>
                 `;
 
             await sendEmail(
                 user.email,
-                `Account ${statusText} - FrostKontroll`,
+                `Account ${statusText} - PoleKit`,
                 `
                 <div style="font-family: Arial, sans-serif; color: #333; background: #f5f8fa; padding: 20px; border-radius: 8px;">
                     <div style="text-align: center;">
-                        <img src="cid:companyLogo" alt="FrostKontroll Logo" style="width: 120px; margin-bottom: 20px;" />
+                        <img src="cid:companyLogo" alt="IOTFIY Logo" style="width: 120px; margin-bottom: 20px;" />
                     </div>
                     <h2 style="color: #0055a5;">Account ${statusText}</h2>
                     ${messageBody}
                     <hr style="border: 0; border-top: 1px solid #ddd; margin: 30px 0;" />
                     <p style="font-size: 12px; color: #888; text-align: center;">
-                        &copy; ${new Date().getFullYear()} FrostKontroll. All rights reserved.<br/>
-                        <a href="mailto:support@frostkontroll.com" style="color: #0055a5; text-decoration: none;">Contact Support</a>
+                        &copy; ${new Date().getFullYear()} IOTFIY Solutions. All rights reserved.<br/>
+                        <a href="mailto:support@iotfiysolution.com" style="color: #0055a5; text-decoration: none;">Contact Support</a>
                     </p>
                 </div>
                 `
